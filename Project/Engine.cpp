@@ -13,7 +13,7 @@ void global_key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 void global_mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	
+	Engine::getInstance()->mouse_callback(window, xpos, ypos);
 }
 void global_mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -25,7 +25,7 @@ void global_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 void global_window_size_callback(GLFWwindow* window, int width, int height)
 {
-	
+	Engine::getInstance()->window_size_callback(window, width, height);
 }
 void global_framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -97,7 +97,7 @@ void Engine::initializeGLFW()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 }
 
 void Engine::initializeGLEW()
@@ -141,6 +141,12 @@ void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action,
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+
+	Screen* screen = screenManager.getCurrentScreen();
+	if (screen != nullptr)
+	{
+		screen->key_callback(window, key, scancode, action, mode);
+	}
 }
 
 void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -149,5 +155,26 @@ void Engine::mouse_button_callback(GLFWwindow* window, int button, int action, i
 	if(screen != nullptr)
 	{
 		screen->mouse_button_callback(window, button, action, mods);
+	}
+}
+
+void Engine::window_size_callback(GLFWwindow* window, int width, int height)
+{
+	screenManager.setDimensions(width, height);
+	glViewport(0, 0, width, height);
+
+	Screen* screen = screenManager.getCurrentScreen();
+	if (screen != nullptr)
+	{
+		screen->window_size_callback(window, width, height);
+	}
+}
+
+void Engine::mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	Screen* screen = screenManager.getCurrentScreen();
+	if (screen != nullptr)
+	{
+		screen->mouse_callback(window, xpos, ypos);
 	}
 }

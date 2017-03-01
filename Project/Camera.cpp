@@ -26,7 +26,7 @@ Camera::Camera(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat up
 glm::mat4 Camera::getViewMatrix()
 {
 
-	return glm::lookAt(position, lookAtOrigin? origin:position + front, up);
+	return glm::lookAt(position,  position + front, up);
 
 }
 

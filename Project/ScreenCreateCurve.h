@@ -15,7 +15,9 @@ private:
 	enum CURRENT_PHASE
 	{
 		CREATING_PROFILE_CURVE,
-		CREATING_TRAJECTORY_CURVE
+		DISPLAYING_PROFILE_CURVE,
+		CREATING_TRAJECTORY_CURVE,
+		DISPLAYING_TRAJECTORY_CURVE
 	};
 	CURRENT_PHASE phase = CREATING_PROFILE_CURVE;
 
@@ -25,16 +27,28 @@ private:
 	Shader* shader;
 
 	
-	void updateRendering();
+	void updateRendering(std::vector<glm::vec3>);
+
+	void subdivision(std::vector<glm::vec3>*,float u0, glm::vec3 u0T, float u1, glm::vec3 u1T, glm::vec3 p1, glm::vec3 p2, glm::vec3 t1, glm::vec3 t2, float maxLineLength);
+
+	glm::vec3 HermineFunction(float u, glm::vec3 p1, glm::vec3 p2, glm::vec3 t1, glm::vec3 t2);
+
+	std::vector<glm::vec3> createCatmullRomSpline(std::vector<glm::vec3>);
+	std::vector<glm::vec3> createHermineSpline(std::vector<glm::vec3>, std::vector<glm::vec3>);
 
 	GLuint VAO;
 	GLuint VBO;
+	GLuint EBO;
+
+	int EBOSize;
 
 	GLfloat* vboArray;
+	GLuint* eboArray;
 
 public:
 	ScreenCreateCurve(ScreenManager*);
 
+	
 	
 
 	void tick();
@@ -44,6 +58,6 @@ public:
 
 	void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
-
+	void window_size_callback(GLFWwindow* window, int width, int height);
 
 };

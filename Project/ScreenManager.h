@@ -16,4 +16,9 @@ public:
 
 	int getWidth();
 	int getHeight();
+
+	void setWidth(int width);
+	void setHeight(int height);
+
+	void setDimensions(int width, int height);
 };

@@ -24,3 +24,11 @@ void Screen::mouse_button_callback(GLFWwindow* window, int button, int action, i
 	
 }
 
+void Screen::window_size_callback(GLFWwindow* window, int width, int height)
+{
+	
+}
+void Screen::mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	
+}
