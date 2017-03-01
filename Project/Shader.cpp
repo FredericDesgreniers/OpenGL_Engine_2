@@ -15,6 +15,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 		vertexCode = readShaderCodeFromFile(vertexPath);
 		fragmentCode = readShaderCodeFromFile(fragmentPath);
 		std::cout << vertexCode << std::endl;
+		std::cout << fragmentCode << std::endl;;
 		
 
 	}catch(std::ifstream::failure e)

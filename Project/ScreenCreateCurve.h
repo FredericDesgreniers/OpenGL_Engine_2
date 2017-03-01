@@ -19,6 +19,15 @@ private:
 		CREATING_TRAJECTORY_CURVE,
 		DISPLAYING_TRAJECTORY_CURVE
 	};
+
+	enum SWEEP_TYPE
+	{
+		UNDEFINED,
+		TRANSLATE,
+		ROTATE
+	};
+	SWEEP_TYPE type = UNDEFINED;
+
 	CURRENT_PHASE phase = CREATING_PROFILE_CURVE;
 
 	std::vector<glm::vec3> profile_curve;
@@ -30,6 +39,8 @@ private:
 	void updateRendering(std::vector<glm::vec3>);
 
 	void subdivision(std::vector<glm::vec3>*,float u0, glm::vec3 u0T, float u1, glm::vec3 u1T, glm::vec3 p1, glm::vec3 p2, glm::vec3 t1, glm::vec3 t2, float maxLineLength);
+
+	std::vector<glm::vec3> normalizeCurve(std::vector<glm::vec3>);
 
 	glm::vec3 HermineFunction(float u, glm::vec3 p1, glm::vec3 p2, glm::vec3 t1, glm::vec3 t2);
 

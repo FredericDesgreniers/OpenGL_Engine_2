@@ -8,11 +8,15 @@ void global_window_size_callback1(GLFWwindow* window, int width, int height)
 {
 	Engine::getInstance()->window_size_callback(window, width, height);
 }
-ScreenDisplaySweep::ScreenDisplaySweep(ScreenManager* screenManager, std::vector<glm::vec3> profileCurve, std::vector<glm::vec3> trajectoryCurve, int num):Screen(screenManager),shader("a1Shader1.vs","a1Shader1.fs"),  profileCurve(profileCurve), trajectoryCurve(trajectoryCurve)
+void global_error_callback1(int error, const char* description)
+{
+	Engine::getInstance()->error_callback(error, description);
+}
+ScreenDisplaySweep::ScreenDisplaySweep(ScreenManager* screenManager, std::vector<glm::vec3> profileCurve, std::vector<glm::vec3> trajectoryCurve, int num):Screen(screenManager),  profileCurve(profileCurve), trajectoryCurve(trajectoryCurve)
 {
 	window = glfwCreateWindow(500, 500, "Fred's rendering engine", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
-
+	shader = new Shader("a1Shader1.vs", "a1Shader1.fs");
 
 	// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
 	glewExperimental = GL_TRUE;
@@ -21,7 +25,7 @@ ScreenDisplaySweep::ScreenDisplaySweep(ScreenManager* screenManager, std::vector
 
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
-	
+	glfwSetErrorCallback(global_error_callback1);
 	glfwSetCursorPosCallback(window, global_mouse_callback1);
 	glfwSetWindowSizeCallback(window, global_window_size_callback1);
 	glfwMakeContextCurrent(window);
@@ -61,24 +65,16 @@ void ScreenDisplaySweep::render()
 
 	glm::mat4 projection;
 	projection = glm::perspective(camera.zoom, GLfloat(screenManager->getWidth()) / GLfloat(screenManager->getHeight()), 0.1f, 1000.0f);
+	
+	shader->use();
 
-	shader.use();
+	GLuint modelLoc = glGetUniformLocation(shader->program, "model");
 
-	GLuint modelLoc = glGetUniformLocation(shader.program, "model");
-
-	GLuint viewLoc = glGetUniformLocation(shader.program, "view");
+	GLuint viewLoc = glGetUniformLocation(shader->program, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-	GLuint projectionLoc = glGetUniformLocation(shader.program, "projection");
+	GLuint projectionLoc = glGetUniformLocation(shader->program, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-
-
-	GLuint addColor = glGetUniformLocation(shader.program, "addColor");
-	glUniform3f(addColor, 0.0f, 0.0f, 0.0f);
-
-	glBindVertexArray(VAO);
-
 	
 
 	glm::mat4 model;
@@ -90,6 +86,7 @@ void ScreenDisplaySweep::render()
 
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
+	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indicesSize, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
@@ -101,11 +98,6 @@ void ScreenDisplaySweep::doRotateSweep()
 }
 void ScreenDisplaySweep::doTranslateSweep()
 {
-	//open assignment 1 shaders
-
-	//program = new Shader("a1Shader.vs", "a1Shader.fs");
-
-
 	//get the size of the vertices array. 
 	size = profileCurve.size() * trajectoryCurve.size() * 3;
 
@@ -159,6 +151,7 @@ void ScreenDisplaySweep::doTranslateSweep()
 		}
 		
 	}
+	std::cout << GL_MAX_ELEMENTS_VERTICES << "," << GL_MAX_ELEMENTS_INDICES;
 
 	//bind the VAO/VBO/EBO
 	glGenVertexArrays(1, &VAO);

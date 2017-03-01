@@ -59,11 +59,11 @@ void Engine::run()
 		
 		if(screen != nullptr)
 		{
-			screen->tick();
-
 			screen->render();
+			glfwSwapBuffers(window);
+			screen->tick();
 		}
-		glfwSwapBuffers(window);
+		
 
 	}
 

@@ -12,13 +12,47 @@ ScreenCreateCurve::ScreenCreateCurve(ScreenManager* screenManager):Screen(screen
 
 
 	updateRendering(profile_curve);
+	while (type == UNDEFINED) {
+		std::cout << "Which type of sweep do you want? (T: TRANSLATIONAL) or (R: Rotation):";
+		char c;
+		std::cin >> c;
 
+		switch (c)
+		{
+		case 'T':
+		case 't':
+			type = TRANSLATE;
+			break;
+		case 'R':
+		case 'r':
+			type = ROTATE;
+			break;
+		default:
+			type = UNDEFINED;
+		}
+	}
 	
 }
 
 void ScreenCreateCurve::tick()
 {
-	
+	if (phase == DISPLAYING_TRAJECTORY_CURVE)
+	{
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
+		screenManager->setCurrentScreen(new ScreenDisplaySweep(screenManager, normalizeCurve(profile_curve), normalizeCurve(trajectory_curve), 0));
+	}
+	if (phase == DISPLAYING_PROFILE_CURVE && type == ROTATE)
+	{
+		glDeleteVertexArrays(1, &VAO);
+		glDeleteBuffers(1, &VBO);
+		glDeleteBuffers(1, &EBO);
+		std::cout << "Number of rotation parts: ";
+		int num;
+		std::cin >> num;
+		screenManager->setCurrentScreen(new ScreenDisplaySweep(screenManager, normalizeCurve(profile_curve), normalizeCurve(trajectory_curve), num));
+	}
 }
 void ScreenCreateCurve::render()
 {
@@ -47,11 +81,6 @@ void ScreenCreateCurve::render()
 			if(phase == DISPLAYING_PROFILE_CURVE)
 				glDrawElements(GL_LINES, EBOSize, GL_UNSIGNED_INT, 0);
 		}
-
-		glBindVertexArray(0);
-
-
-
 }
 
 void ScreenCreateCurve::updateRendering(std::vector<glm::vec3> curve)
@@ -65,21 +94,13 @@ void ScreenCreateCurve::updateRendering(std::vector<glm::vec3> curve)
 	{
 		delete eboArray;
 	}
-	int size = curve.size() * 3;
-	vboArray = new GLfloat[size];
+	std::vector<glm::vec3> newCurve = normalizeCurve(curve);
 
-	int vboIndex = 0;
-	for(glm::vec3 vec : curve)
-	{
-		vboArray[vboIndex++] = vec.x*2 / screenManager->getWidth()-1;
-		vboArray[vboIndex++] = 1-(vec.y*2 / screenManager->getHeight());
-		vboArray[vboIndex++] = vec.z;
-	}
-	EBOSize = curve.size() * 2 * sizeof(GLuint);
+	EBOSize = newCurve.size() * 2 * sizeof(GLuint);
 	eboArray = new GLuint[EBOSize];
 	int eboIndex = 0;
-	if(curve.size() > 1)
-	for(int i=0; i < curve.size()-1; i++)
+	if(newCurve.size() > 1)
+	for(int i=0; i < newCurve.size()-1; i++)
 	{
 		eboArray[eboIndex++] = i;
 		eboArray[eboIndex++] = i+1;
@@ -89,8 +110,8 @@ void ScreenCreateCurve::updateRendering(std::vector<glm::vec3> curve)
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, size*sizeof(GLfloat), vboArray, GL_DYNAMIC_DRAW);
-	if (curve.size() > 0) 
+	glBufferData(GL_ARRAY_BUFFER, newCurve.size()*sizeof(glm::vec3), newCurve.data(), GL_DYNAMIC_DRAW);
+	if (newCurve.size() > 0)
 	{
 		
 
@@ -102,6 +123,8 @@ void ScreenCreateCurve::updateRendering(std::vector<glm::vec3> curve)
 	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
+
+
 }
 glm::vec3 ScreenCreateCurve::HermineFunction(float u, glm::vec3 p1, glm::vec3 p2, glm::vec3 t1, glm::vec3 t2)
 {
@@ -196,6 +219,21 @@ void ScreenCreateCurve::subdivision(std::vector<glm::vec3>* points, float u0, gl
 		points->push_back(x1);
 	}
 }
+std::vector<glm::vec3> ScreenCreateCurve::normalizeCurve(std::vector<glm::vec3> curve)
+{
+	std::vector<glm::vec3> newCurve;
+
+	for(glm::vec3 vec : curve)
+	{
+		glm::vec3 vec2;
+		vec2.x = vec.x * 2 / screenManager->getWidth() - 1;
+		vec2.y = 1 - (vec.y * 2 / screenManager->getHeight());
+
+		newCurve.push_back(vec2);
+	}
+
+	return newCurve;
+}
 
 
 void ScreenCreateCurve::key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -206,17 +244,14 @@ void ScreenCreateCurve::key_callback(GLFWwindow* window, int key, int scancode, 
 		{
 		case CREATING_PROFILE_CURVE:
 			profile_curve = createCatmullRomSpline(profile_curve);
-			updateRendering(profile_curve);
 			phase = DISPLAYING_PROFILE_CURVE;
+			updateRendering(profile_curve);
+			
 			break;
 		case CREATING_TRAJECTORY_CURVE:
 			trajectory_curve = createCatmullRomSpline(trajectory_curve);
-			updateRendering(trajectory_curve);
 			phase = DISPLAYING_TRAJECTORY_CURVE;
-			glDeleteVertexArrays(1, &VAO);
-			glDeleteBuffers(1, &VBO);
-			glDeleteBuffers(1, &EBO);
-			screenManager->setCurrentScreen(new ScreenDisplaySweep(screenManager, profile_curve, trajectory_curve, 0));
+			updateRendering(trajectory_curve);
 			break;
 		}
 	}
@@ -230,6 +265,7 @@ void ScreenCreateCurve::mouse_button_callback(GLFWwindow* window, int button, in
 
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
+
 		std::cout << "Clicked on screen at " + std::to_string(xpos) + "," + std::to_string(ypos) << std::endl;
 		switch(phase)
 		{

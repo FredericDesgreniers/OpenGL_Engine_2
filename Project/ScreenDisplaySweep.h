@@ -42,7 +42,7 @@ private:
 
 	Camera camera;
 
-	Shader shader;
+	Shader* shader;
 
 	std::vector<glm::vec3> profileCurve, trajectoryCurve;
 };
