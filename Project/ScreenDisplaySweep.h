@@ -13,7 +13,7 @@ public:
 	void render();
 	void tick();
 	void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-
+	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	
 
 	glm::vec3 rotation;
@@ -27,7 +27,7 @@ private:
 		ROTATE
 	};
 	SWEEP_TYPE sweep;
-
+	int span;
 	GLuint VAO, VBO, EBO;
 
 	GLfloat* vboArray;

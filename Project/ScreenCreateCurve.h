@@ -8,7 +8,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "VaoObject.h"
-
+#include "glm/ext.hpp"
 class ScreenCreateCurve:public Screen
 {
 private:
@@ -26,6 +26,9 @@ private:
 		TRANSLATE,
 		ROTATE
 	};
+
+	
+
 	SWEEP_TYPE type = UNDEFINED;
 
 	CURRENT_PHASE phase = CREATING_PROFILE_CURVE;

@@ -204,7 +204,7 @@ void ScreenCreateCurve::subdivision(std::vector<glm::vec3>* points, float u0, gl
 
 	float angle = glm::degrees(acos(dot/(abs(l1*l2))));
 
-	if(angle > 90 && angle < 270)
+	if(angle >= 90 && angle <= 270)
 	{
 		angle -= 180;
 	}
@@ -216,7 +216,10 @@ void ScreenCreateCurve::subdivision(std::vector<glm::vec3>* points, float u0, gl
 	}else
 	{
 		points->push_back(x0);
-		points->push_back(x1);
+		//points->push_back(x1);
+
+		//std::cout << glm::to_string(x0) << std::endl;
+		//std::cout << glm::to_string(x1) << std::endl;
 	}
 }
 std::vector<glm::vec3> ScreenCreateCurve::normalizeCurve(std::vector<glm::vec3> curve)
