@@ -34,6 +34,7 @@ ScreenDisplaySweep::ScreenDisplaySweep(ScreenManager* screenManager, std::vector
 	glfwSetCursorPosCallback(window, global_mouse_callback1);
 	glfwSetWindowSizeCallback(window, global_window_size_callback1);
 	glfwSetKeyCallback(window, global_key_callback1);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glewInit();
 
 	glewExperimental = GL_TRUE;
@@ -80,12 +81,28 @@ ScreenDisplaySweep::ScreenDisplaySweep(ScreenManager* screenManager, std::vector
 }
 void ScreenDisplaySweep::tick()
 {
-	
+	calculateDeltaTime();
+
+
+
+	if (glfwGetKey(window, GLFW_KEY_W))
+		camera.processKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S))
+		camera.processKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A))
+		camera.processKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D))
+		camera.processKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_SPACE))
+		camera.processKeyboard(UP, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+		camera.processKeyboard(DOWN, deltaTime);
+
 }
 
 void ScreenDisplaySweep::render()
 {
-	glClearColor(255.0f, 255.0f, 255.0f, 255.0f);
+	glClearColor(0,0,0, 255.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::mat4 view;
@@ -230,8 +247,8 @@ void ScreenDisplaySweep::doTranslateSweep()
 
 			//translate the profile vector by the trajectory vector and add it to the vector array
 			vboArray[index] = pVec.x + tVec.x;
-			vboArray[index + 1] = pVec.y + tVec.y;
-			vboArray[index + 2] = pVec.z + tVec.z;
+			vboArray[index + 1] = pVec.y + tVec.z;
+			vboArray[index + 2] = pVec.z + tVec.y;
 
 			index += 3;
 
@@ -260,6 +277,13 @@ void ScreenDisplaySweep::doTranslateSweep()
 
 
 }
+void ScreenDisplaySweep::calculateDeltaTime()
+{
+	GLfloat currentFrame = glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
+}
+
 void ScreenDisplaySweep::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	if (firstMouse)

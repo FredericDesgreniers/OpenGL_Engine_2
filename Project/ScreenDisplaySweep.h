@@ -35,6 +35,12 @@ private:
 
 	int size, indicesSize;
 
+	//delta time
+	GLfloat deltaTime = 0.0f;
+	GLfloat lastFrame = 0.0f;
+
+	void calculateDeltaTime();
+
 	GLfloat lastMouseX, lastMouseY;
 
 	void doRotateSweep();
